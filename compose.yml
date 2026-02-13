@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: problem-solution-db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: problemsolution
+      POSTGRES_USER: lex_luthor
+      POSTGRES_PASSWORD: supermansux
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
