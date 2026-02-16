@@ -1,4 +1,4 @@
-package com.problemsolutionsltd.model;
+package com.problemsolutionsltd.inventory.Entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;

@@ -1,4 +1,4 @@
-package com.problemsolutionsltd.model;
+package com.problemsolutionsltd.inventory.Entity;
 
 public enum Category {
     LETHAL,       // Direct impact tools (Weapons)

@@ -1,4 +1,4 @@
-package com.problemsolutionsltd.model;
+package com.problemsolutionsltd.inventory.Entity;
 
 public enum Status {
     AVAILABLE,      // Ready to ship

@@ -1,9 +1,10 @@
-package com.problemsolutionsltd.service;
+package com.problemsolutionsltd.inventory.service;
 
-import com.problemsolutionsltd.model.Category;
-import com.problemsolutionsltd.model.Solution;
-import com.problemsolutionsltd.model.Status;
-import com.problemsolutionsltd.repository.SolutionRepository;
+import com.problemsolutionsltd.inventory.Entity.Category;
+import com.problemsolutionsltd.inventory.Entity.Solution;
+import com.problemsolutionsltd.inventory.Entity.Status;
+import com.problemsolutionsltd.inventory.repository.SolutionRepository;
+import com.problemsolutionsltd.inventory.service.SolutionService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

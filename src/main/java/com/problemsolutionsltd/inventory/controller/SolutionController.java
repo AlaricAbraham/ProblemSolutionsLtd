@@ -1,7 +1,7 @@
-package com.problemsolutionsltd.controller;
+package com.problemsolutionsltd.inventory.controller;
 
-import com.problemsolutionsltd.model.Solution;
-import com.problemsolutionsltd.service.SolutionService;
+import com.problemsolutionsltd.inventory.Entity.Solution;
+import com.problemsolutionsltd.inventory.service.SolutionService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
