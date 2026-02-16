@@ -1,6 +1,6 @@
-package com.problemsolutionsltd.repository;
+package com.problemsolutionsltd.inventory.repository;
 
-import com.problemsolutionsltd.model.Solution;
+import com.problemsolutionsltd.inventory.Entity.Solution;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

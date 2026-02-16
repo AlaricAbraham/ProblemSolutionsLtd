@@ -1,9 +1,9 @@
-package com.problemsolutionsltd.service;
+package com.problemsolutionsltd.inventory.service;
 
-import com.problemsolutionsltd.model.Solution;
-import com.problemsolutionsltd.model.Status;
+import com.problemsolutionsltd.inventory.Entity.Solution;
+import com.problemsolutionsltd.inventory.Entity.Status;
 import org.springframework.http.HttpStatus;
-import com.problemsolutionsltd.repository.SolutionRepository;
+import com.problemsolutionsltd.inventory.repository.SolutionRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException; // to implement in phase 2 REMOVE COMMENT BEFORE COMMIT
 
