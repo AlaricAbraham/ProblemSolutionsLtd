@@ -38,4 +38,7 @@ public class SolutionController {
     ) {
         return service.createSolution(newSolution);
     }
+
+    @PutMapping("/{id}")
+    public Solution updateSolution(Long id, @Valid @RequestBody Solution updatedSolution) {}
 }
