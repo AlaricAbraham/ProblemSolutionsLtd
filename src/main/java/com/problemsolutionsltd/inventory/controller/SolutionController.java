@@ -39,6 +39,20 @@ public class SolutionController {
         return service.createSolution(newSolution);
     }
 
+    // PUT: http://localhost:8080/api/v1/solutions/{id}
     @PutMapping("/{id}")
-    public Solution updateSolution(Long id, @Valid @RequestBody Solution updatedSolution) {}
+    public Solution updateSolution(
+            @PathVariable Long id,
+            @Valid @RequestBody Solution updatedSolution
+    ) {
+        return service.updateSolution(id, updatedSolution);
+    }
+
+    // DELETE: http://localhost:8080/api/v1/solutions/{id}
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT) // Return 204
+    public void deleteSolution(@PathVariable Long id) {
+        service.deleteSolution(id);
+    }
+
 }
