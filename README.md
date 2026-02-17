@@ -65,22 +65,21 @@ Create a New Inventory Item
 POST /api/v1/solutions
 
 {
-    "name": "Kryptonite Laser",
-    "description": "High-powered laser for dealing with extraterrestrial threats.",
-    "category": "WEAPON", 
-    "stockQuantity": 50,
-    "price": 1500000.00
+   "name": "Kryptonite Laser",
+   "description": "High-powered laser for dealing with extraterrestrial threats.",
+   "category": "LETHAL", 
+   "stockQuantity": 50,
+   "reorderThreshold": 5,
+   "price": 1500000.00
+   "status": "AVAILABLE"
 }
 ```
 
 ## 🗺 Development Roadmap
 
-    [x] Phase 1: Spring Boot API Skeleton & Dockerized PostgreSQL Setup
-
-    [x] Phase 2: Core Data Models, strict Validation, and Global Error Handling
-
-    [ ] Phase 3: Full CRUD Capabilities (Update/Delete endpoints)
-
-    [ ] Phase 4: Transactional Audit Logging (Immutable history tracking for all stock adjustments)
-
-    [ ] Phase 5: React.js Frontend Dashboard integration for real-time visualization
+- [x] Phase 1: Spring Boot API Skeleton & Dockerized PostgreSQL Setup
+- [x] Phase 2: Core Data Models, Strict Validation, and Global Error Handling
+- [x] Phase 3: Full CRUD Capabilities & Custom JPQL Queries (Low Stock Alerts)
+- [ ] Phase 4: Security & Identity (Spring Security, JWT Authentication, Role-Based Access)
+- [ ] Phase 5: Transactional Audit Logging (Hibernate Envers for immutable history tracking)
+- [ ] Phase 6: React Frontend Dashboard (Real-time visualization and protected routes)
