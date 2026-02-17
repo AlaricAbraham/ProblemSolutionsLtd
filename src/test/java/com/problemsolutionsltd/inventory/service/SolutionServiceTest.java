@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -255,5 +256,25 @@ class SolutionServiceTest {
         });
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
         verify(repository, never()).deleteById(anyLong());
+    }
+
+    // ==========================================
+    // CUSTOM QUERY TESTS
+    // ==========================================
+
+    @Test
+    void getLowStockItems_ReturnsListOfItems_WhenCalled() {
+        // ARRANGE
+        Solution item = Solution.builder().name("Ammo").stockQuantity(1).reorderThreshold(5).build();
+        // Mockito's List.of() creates a quick list with our one item
+        when(repository.findItemsNeedingReorder()).thenReturn(List.of(item));
+
+        // ACT
+        List<Solution> result = service.getLowStockItems();
+
+        // ASSERT
+        assertEquals(1, result.size());
+        assertEquals("Low Ammo", result.get(0).getName());
+        verify(repository, times(1)).findItemsNeedingReorder();
     }
 }

@@ -29,6 +29,12 @@ public class SolutionController {
     public Solution getSolutionById(@PathVariable Long id) {
         return service.getSolutionById(id);
     }
+    // GET: http://localhost:8080/api/v1/solutions/low-stock
+    @GetMapping("/low-stock")
+    public List<Solution> getLowStockAlerts() {
+        return service.getLowStockItems();
+    }
+
 
     // POST: http://localhost:8080/api/v1/solutions
     @PostMapping
@@ -54,5 +60,5 @@ public class SolutionController {
     public void deleteSolution(@PathVariable Long id) {
         service.deleteSolution(id);
     }
-
+    
 }
