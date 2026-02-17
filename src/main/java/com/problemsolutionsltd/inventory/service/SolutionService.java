@@ -3,6 +3,7 @@ package com.problemsolutionsltd.inventory.service;
 import com.problemsolutionsltd.inventory.Entity.Solution;
 import com.problemsolutionsltd.inventory.Entity.Status;
 import jakarta.validation.Valid;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.http.HttpStatus;
 import com.problemsolutionsltd.inventory.repository.SolutionRepository;
 import org.springframework.stereotype.Service;
@@ -108,5 +109,11 @@ public class SolutionService {
             );
         }
         repository.deleteById(id);
+    }
+
+    public List<Solution> getLowStockItems() {
+        // We rely on the custom JPQL query we built in the Repository
+        // so PostgreSQL does the heavy filtering, not our Java RAM!
+        return repository.findItemsNeedingReorder();
     }
 }
