@@ -2,6 +2,7 @@ package com.problemsolutionsltd.inventory.service;
 
 import com.problemsolutionsltd.inventory.Entity.Solution;
 import com.problemsolutionsltd.inventory.Entity.Status;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import com.problemsolutionsltd.inventory.repository.SolutionRepository;
 import org.springframework.stereotype.Service;
@@ -60,5 +61,52 @@ public class SolutionService {
                         HttpStatus.NOT_FOUND,
                         "Asset not found. It may have been confiscated."
                 ));
+    }
+
+    public Solution updateSolution(Long id, @Valid Solution updatedSolution) {
+        // First, verify the solution exists
+        Solution existingSolution = repository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Asset not found. It may have been confiscated."
+                ));
+
+        // Apply the same business logic as createSolution
+        if (updatedSolution.getStatus() == null) {
+            if (updatedSolution.getStockQuantity() == 0) {
+                updatedSolution.setStatus(Status.OUT_OF_STOCK);
+            } else {
+                updatedSolution.setStatus(Status.AVAILABLE);
+            }
+        } else if (updatedSolution.getStatus() == Status.AVAILABLE && updatedSolution.getStockQuantity() == 0) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Invalid entry: An item with 0 stock cannot be set to ACTIVE. " +
+                            "Please enter a valid stock amount or change the status."
+            );
+        }
+
+        // Update all fields
+        existingSolution.setName(updatedSolution.getName());
+        existingSolution.setDescription(updatedSolution.getDescription());
+        existingSolution.setCategory(updatedSolution.getCategory());
+        existingSolution.setStockQuantity(updatedSolution.getStockQuantity());
+        existingSolution.setReorderThreshold(updatedSolution.getReorderThreshold());
+        existingSolution.setPrice(updatedSolution.getPrice());
+        existingSolution.setStatus(updatedSolution.getStatus());
+
+        // Save and return
+        return repository.save(existingSolution);
+    }
+
+    public void deleteSolution(Long id) {
+        // Make sure it exists first, otherwise throw a 404
+        if (!repository.existsById(id)) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "Asset not found. It may have already been destroyed."
+            );
+        }
+        repository.deleteById(id);
     }
 }

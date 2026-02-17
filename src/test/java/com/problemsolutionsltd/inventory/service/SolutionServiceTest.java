@@ -27,6 +27,44 @@ class SolutionServiceTest {
     @InjectMocks // Inject the fake database into our real Service
     private SolutionService service;
 
+
+
+    // ==========================================
+    // GET TESTS
+    // ==========================================
+
+    @Test
+    void getSolutionById_ReturnsItem_WhenIdExists() {
+        // ARRANGE
+        Solution item = Solution.builder().id(1L).name("Grappling Hook").build();
+        // Tell fake DB: "When asked for ID 1, return this specific Optional"
+        when(repository.findById(1L)).thenReturn(java.util.Optional.of(item));
+
+        // ACT
+        Solution foundItem = service.getSolutionById(1L);
+
+        // ASSERT
+        assertEquals("Grappling Hook", foundItem.getName());
+    }
+
+    @Test
+    void getSolutionById_ThrowsException_WhenIdDoesNotExist() {
+        // ARRANGE: Tell fake DB: "When asked for ID 99, return empty"
+        when(repository.findById(99L)).thenReturn(java.util.Optional.empty());
+
+        // ACT & ASSERT
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
+            service.getSolutionById(99L);
+        });
+
+        assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
+        assertTrue(exception.getReason().contains("Asset not found"));
+    }
+
+
+    // ==========================================
+    // POST TESTS
+    // ==========================================
     @Test
     void createSolution_ThrowsException_WhenAvailableWithZeroStock() {
         // 1. Set up the bad data as a user might send it
@@ -101,31 +139,121 @@ class SolutionServiceTest {
         assertEquals(Status.DISCONTINUED, savedItem.getStatus());
     }
 
+
+    // ==========================================
+    // UPDATE (PUT) TESTS
+    // ==========================================
+
     @Test
-    void getSolutionById_ReturnsItem_WhenIdExists() {
+    void updateSolution_UpdatesFieldsSuccessfully_WhenValid() {
         // ARRANGE
-        Solution item = Solution.builder().id(1L).name("Grappling Hook").build();
-        // Tell fake DB: "When asked for ID 1, return this specific Optional"
-        when(repository.findById(1L)).thenReturn(java.util.Optional.of(item));
+        Solution existing = Solution.builder().id(1L).name("Old Laser").stockQuantity(5).status(Status.AVAILABLE).build();
+        Solution updatedInfo = Solution.builder().name("New Laser").stockQuantity(15).status(Status.AVAILABLE).build();
+
+        when(repository.findById(1L)).thenReturn(java.util.Optional.of(existing));
+        when(repository.save(any(Solution.class))).thenAnswer(i -> i.getArgument(0));
 
         // ACT
-        Solution foundItem = service.getSolutionById(1L);
+        Solution result = service.updateSolution(1L, updatedInfo);
 
         // ASSERT
-        assertEquals("Grappling Hook", foundItem.getName());
+        assertEquals("New Laser", result.getName());
+        assertEquals(15, result.getStockQuantity());
+        assertEquals(Status.AVAILABLE, result.getStatus());
+        verify(repository, times(1)).save(existing);
     }
 
     @Test
-    void getSolutionById_ThrowsException_WhenIdDoesNotExist() {
-        // ARRANGE: Tell fake DB: "When asked for ID 99, return empty"
+    void updateSolution_ThrowsException_WhenIdDoesNotExist() {
+        // ARRANGE
+        Solution updatedInfo = Solution.builder().name("Ghost Item").build();
         when(repository.findById(99L)).thenReturn(java.util.Optional.empty());
 
         // ACT & ASSERT
         ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
-            service.getSolutionById(99L);
+            service.updateSolution(99L, updatedInfo);
         });
-
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
-        assertTrue(exception.getReason().contains("Asset not found"));
+        verify(repository, never()).save(any(Solution.class));
+    }
+
+    @Test
+    void updateSolution_ThrowsException_WhenSettingAvailableWithZeroStock() {
+        // ARRANGE
+        Solution existing = Solution.builder().id(1L).name("Box").stockQuantity(5).status(Status.AVAILABLE).build();
+        // User maliciously tries to update stock to 0 but force status to AVAILABLE
+        Solution updatedInfo = Solution.builder().name("Box").stockQuantity(0).status(Status.AVAILABLE).build();
+
+        when(repository.findById(1L)).thenReturn(java.util.Optional.of(existing));
+
+        // ACT & ASSERT
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
+            service.updateSolution(1L, updatedInfo);
+        });
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
+        verify(repository, never()).save(any(Solution.class));
+    }
+
+    @Test
+    void updateSolution_AutoTogglesToOutOfStock_WhenStockDropsToZero() {
+        // ARRANGE: Item was AVAILABLE with 5 stock
+        Solution existing = Solution.builder().id(1L).name("Box").stockQuantity(5).status(Status.AVAILABLE).build();
+        // User updates stock to 0, but forgets to provide a status
+        Solution updatedInfo = Solution.builder().name("Box").stockQuantity(0).status(null).build();
+
+        when(repository.findById(1L)).thenReturn(java.util.Optional.of(existing));
+        when(repository.save(any(Solution.class))).thenAnswer(i -> i.getArgument(0));
+
+        // ACT
+        Solution result = service.updateSolution(1L, updatedInfo);
+
+        // ASSERT: Brain should step in and toggle to OUT_OF_STOCK
+        assertEquals(Status.OUT_OF_STOCK, result.getStatus());
+    }
+
+    @Test
+    void updateSolution_AutoTogglesToAvailable_WhenStockRestored() {
+        // ARRANGE: Item was OUT_OF_STOCK with 0 stock
+        Solution existing = Solution.builder().id(1L).name("Box").stockQuantity(0).status(Status.OUT_OF_STOCK).build();
+        // User receives a shipment of 10, but forgets to provide a status
+        Solution updatedInfo = Solution.builder().name("Box").stockQuantity(10).status(null).build();
+
+        when(repository.findById(1L)).thenReturn(java.util.Optional.of(existing));
+        when(repository.save(any(Solution.class))).thenAnswer(i -> i.getArgument(0));
+
+        // ACT
+        Solution result = service.updateSolution(1L, updatedInfo);
+
+        // ASSERT: Brain should step in and toggle to AVAILABLE
+        assertEquals(Status.AVAILABLE, result.getStatus());
+    }
+
+    // ==========================================
+    // DELETE TESTS
+    // ==========================================
+
+    @Test
+    void deleteSolution_CallsRepository_WhenIdExists() {
+        // ARRANGE
+        when(repository.existsById(1L)).thenReturn(true);
+
+        // ACT
+        service.deleteSolution(1L);
+
+        // ASSERT
+        verify(repository, times(1)).deleteById(1L);
+    }
+
+    @Test
+    void deleteSolution_ThrowsException_WhenIdDoesNotExist() {
+        // ARRANGE
+        when(repository.existsById(99L)).thenReturn(false);
+
+        // ACT & ASSERT
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
+            service.deleteSolution(99L);
+        });
+        assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
+        verify(repository, never()).deleteById(anyLong());
     }
 }
